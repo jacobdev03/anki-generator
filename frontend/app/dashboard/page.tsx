@@ -1,0 +1,275 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { FileDropzone } from "@/components/file-dropzone";
+import { FlashcardGrid } from "@/components/flashcard-grid";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+  uploadPDF,
+  generateCards,
+  exportDeck,
+  type Flashcard,
+} from "@/lib/api";
+import {
+  Sparkles,
+  Download,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  Layers,
+  Zap,
+} from "lucide-react";
+
+type Stage = "idle" | "uploading" | "generating" | "done" | "error";
+
+export default function Dashboard() {
+  const [stage, setStage] = useState<Stage>("idle");
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [progress, setProgress] = useState(0);
+  const [totalChunks, setTotalChunks] = useState(0);
+  const [completedChunks, setCompletedChunks] = useState(0);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [deckName, setDeckName] = useState("My Anki Deck");
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleFileSelected = useCallback(async (file: File) => {
+    setFlashcards([]);
+    setErrorMessage("");
+    setFileName(file.name);
+    setStage("uploading");
+    setProgress(0);
+
+    try {
+      // Step 1: Upload and chunk the PDF
+      const uploadRes = await uploadPDF(file);
+      const chunks = uploadRes.chunks;
+      setTotalChunks(chunks.length);
+      setCompletedChunks(0);
+      setStage("generating");
+
+      // Step 2: Process each chunk through AI
+      const allCards: Flashcard[] = [];
+
+      for (let i = 0; i < chunks.length; i++) {
+        const res = await generateCards(chunks[i]);
+        allCards.push(...res.flashcards);
+        setFlashcards([...allCards]);
+        setCompletedChunks(i + 1);
+        setProgress(Math.round(((i + 1) / chunks.length) * 100));
+      }
+
+      setStage("done");
+    } catch (err) {
+      setStage("error");
+      setErrorMessage(
+        err instanceof Error ? err.message : "An unexpected error occurred"
+      );
+    }
+  }, []);
+
+  const handleExport = useCallback(async () => {
+    if (flashcards.length === 0) return;
+    setIsExporting(true);
+
+    try {
+      const blob = await exportDeck(deckName, flashcards);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${deckName}.apkg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error ? err.message : "Export failed"
+      );
+    } finally {
+      setIsExporting(false);
+    }
+  }, [flashcards, deckName]);
+
+  const handleReset = useCallback(() => {
+    setStage("idle");
+    setFlashcards([]);
+    setProgress(0);
+    setTotalChunks(0);
+    setCompletedChunks(0);
+    setErrorMessage("");
+    setFileName("");
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center justify-center size-8 rounded-lg bg-primary">
+              <Zap className="size-4 text-primary-foreground" />
+            </div>
+            <h1 className="text-base font-semibold tracking-tight">
+              Anki Generator
+            </h1>
+          </div>
+
+          {flashcards.length > 0 && (
+            <Badge variant="secondary" className="font-mono text-xs">
+              {flashcards.length} cards
+            </Badge>
+          )}
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="mx-auto max-w-5xl px-6 py-10">
+        <div className="space-y-8">
+          {/* Hero Section */}
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold tracking-tight">
+              Generate Flashcards
+            </h2>
+            <p className="text-muted-foreground text-sm max-w-lg">
+              Upload a PDF document and let AI extract key concepts into
+              ready-to-use Anki flashcards. Click any card to preview the
+              answer.
+            </p>
+          </div>
+
+          {/* Upload Section */}
+          <FileDropzone
+            onFileSelected={handleFileSelected}
+            disabled={stage === "uploading" || stage === "generating"}
+          />
+
+          {/* Progress Section */}
+          {(stage === "uploading" || stage === "generating") && (
+            <Card className="border-primary/20 bg-primary/[0.02]">
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <Loader2 className="size-4 text-primary animate-spin" />
+                    <span className="text-sm font-medium">
+                      {stage === "uploading"
+                        ? "Uploading & extracting text..."
+                        : `Processing chunk ${completedChunks} of ${totalChunks}...`}
+                    </span>
+                  </div>
+                  {stage === "generating" && (
+                    <span className="text-xs font-mono text-muted-foreground">
+                      {progress}%
+                    </span>
+                  )}
+                </div>
+                {stage === "generating" && (
+                  <Progress value={progress} className="h-1.5" />
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Done Banner */}
+          {stage === "done" && (
+            <Card className="border-green-500/20 bg-green-500/[0.03]">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2 className="size-4 text-green-600" />
+                    <span className="text-sm font-medium">
+                      Generated {flashcards.length} flashcards from{" "}
+                      <span className="font-mono">{fileName}</span>
+                    </span>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={handleReset}>
+                    Upload another
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Error Banner */}
+          {stage === "error" && (
+            <Card className="border-destructive/20 bg-destructive/[0.03]">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <AlertCircle className="size-4 text-destructive" />
+                    <span className="text-sm font-medium">
+                      {errorMessage}
+                    </span>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={handleReset}>
+                    Try again
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Export Section */}
+          {flashcards.length > 0 && (
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center size-10 rounded-lg bg-muted">
+                      <Layers className="size-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Export Deck</p>
+                      <p className="text-xs text-muted-foreground">
+                        Download as .apkg for Anki
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <input
+                      id="deck-name-input"
+                      type="text"
+                      value={deckName}
+                      onChange={(e) => setDeckName(e.target.value)}
+                      placeholder="Deck name"
+                      className="h-8 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30 transition-all flex-1 sm:w-48"
+                    />
+                    <Button
+                      onClick={handleExport}
+                      disabled={isExporting}
+                      size="default"
+                      className="gap-1.5"
+                    >
+                      {isExporting ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Download className="size-4" />
+                      )}
+                      {isExporting ? "Exporting..." : "Download"}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Flashcard Grid */}
+          {flashcards.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="size-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold">
+                  Generated Flashcards
+                </h3>
+              </div>
+              <FlashcardGrid flashcards={flashcards} />
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
