@@ -20,7 +20,7 @@ async def handle_upload(file: UploadFile = File(...)):
 
     try:
         processor = PDFProcessor(tmp_path)
-        chunks = processor.get_markdown_chunks(chunk_size=1000)
+        chunks = processor.get_markdown_chunks(chunk_size=2000)
         
         return {
             "message": "Processing successful",
