@@ -1,10 +1,12 @@
 import os
 import tempfile
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List
 from app.services.exporter import AnkiExporter
+from app.api.endpoints.auth import get_current_active_user
+from app.models.user import User
 
 router = APIRouter()
 
@@ -24,7 +26,11 @@ def remove_temp_file(path: str):
             print(f"Warning: Failed to delete temp file {path} - {e}")
 
 @router.post("/export")
-async def export_deck(request: ExportRequest, background_tasks: BackgroundTasks):
+async def export_deck(
+    request: ExportRequest, 
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_active_user)
+):
     if not request.flashcards:
         raise HTTPException(status_code=400, detail="Flashcards list cannot be empty.")
     

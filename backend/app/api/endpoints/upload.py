@@ -1,12 +1,17 @@
 import os
 import tempfile
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from app.services.processor import PDFProcessor
+from app.api.endpoints.auth import get_current_active_user
+from app.models.user import User
 
 router = APIRouter()
 
 @router.post("/upload")
-async def handle_upload(file: UploadFile = File(...)):
+async def handle_upload(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_active_user)
+):
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
 
