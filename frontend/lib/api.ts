@@ -1,5 +1,94 @@
 const API_BASE = "http://127.0.0.1:8000/api";
 
+// --- Token Management ---
+export function setToken(token: string) {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("anki_token", token);
+  }
+}
+
+export function getToken(): string | null {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("anki_token");
+  }
+  return null;
+}
+
+export function logout() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("anki_token");
+    window.location.href = "/auth";
+  }
+}
+
+function getAuthHeaders(): HeadersInit {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+// --- Auth Endpoints ---
+
+export async function login(username: string, password: string) {
+  const formData = new URLSearchParams();
+  formData.append("username", username);
+  formData.append("password", password);
+
+  const res = await fetch(`${API_BASE}/token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: formData.toString(),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Login failed");
+  }
+
+  const data = await res.json();
+  setToken(data.access_token);
+  return data;
+}
+
+export async function register(username: string, email: string, password: string, fullName: string = "") {
+  const res = await fetch(`${API_BASE}/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username,
+      email,
+      password,
+      full_name: fullName,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Registration failed");
+  }
+
+  return res.json();
+}
+
+export async function getMe() {
+  const res = await fetch(`${API_BASE}/users/me/`, {
+    headers: {
+      ...getAuthHeaders(),
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Not authenticated");
+  }
+
+  return res.json();
+}
+
+// --- App Endpoints ---
+
 export interface Flashcard {
   front: string;
   back: string;
@@ -22,6 +111,9 @@ export async function uploadPDF(file: File): Promise<UploadResponse> {
 
   const res = await fetch(`${API_BASE}/upload`, {
     method: "POST",
+    headers: {
+      ...getAuthHeaders(),
+    },
     body: formData,
   });
 
@@ -36,7 +128,10 @@ export async function uploadPDF(file: File): Promise<UploadResponse> {
 export async function generateCards(text: string): Promise<GenerateResponse> {
   const res = await fetch(`${API_BASE}/generate`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
     body: JSON.stringify({ text }),
   });
 
@@ -54,7 +149,10 @@ export async function exportDeck(
 ): Promise<Blob> {
   const res = await fetch(`${API_BASE}/export`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
     body: JSON.stringify({ deck_name: deckName, flashcards }),
   });
 
