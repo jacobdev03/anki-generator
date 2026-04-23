@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { FileDropzone } from "@/components/file-dropzone";
 import { FlashcardGrid } from "@/components/flashcard-grid";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,11 @@ import {
   uploadPDF,
   generateCards,
   exportDeck,
+  getMe,
+  logout,
   type Flashcard,
 } from "@/lib/api";
+import { useRouter } from "next/navigation";
 import {
   Sparkles,
   Download,
@@ -21,6 +24,8 @@ import {
   AlertCircle,
   Layers,
   Zap,
+  LogOut,
+  User as UserIcon,
 } from "lucide-react";
 
 type Stage = "idle" | "uploading" | "generating" | "done" | "error";
@@ -35,6 +40,23 @@ export default function Dashboard() {
   const [fileName, setFileName] = useState("");
   const [deckName, setDeckName] = useState("My Anki Deck");
   const [isExporting, setIsExporting] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const userData = await getMe();
+        setUser(userData);
+      } catch (err) {
+        router.push("/auth");
+      } finally {
+        setIsInitializing(false);
+      }
+    }
+    checkAuth();
+  }, [router]);
 
   const handleFileSelected = useCallback(async (file: File) => {
     setFlashcards([]);
@@ -104,6 +126,14 @@ export default function Dashboard() {
     setFileName("");
   }, []);
 
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="size-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -118,11 +148,26 @@ export default function Dashboard() {
             </h1>
           </div>
 
-          {flashcards.length > 0 && (
-            <Badge variant="secondary" className="font-mono text-xs">
-              {flashcards.length} cards
-            </Badge>
-          )}
+          <div className="flex items-center gap-4">
+            {flashcards.length > 0 && (
+              <Badge variant="secondary" className="font-mono text-xs hidden sm:inline-flex">
+                {flashcards.length} cards
+              </Badge>
+            )}
+            {user && (
+              <div className="flex items-center gap-3 border-l pl-4">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <div className="flex items-center justify-center size-7 rounded-full bg-secondary text-secondary-foreground">
+                    <UserIcon className="size-3.5" />
+                  </div>
+                  <span className="hidden sm:inline-block">{user.username}</span>
+                </div>
+                <Button variant="ghost" size="icon" onClick={logout} className="size-8 rounded-full" title="Logout">
+                  <LogOut className="size-4 text-muted-foreground" />
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
