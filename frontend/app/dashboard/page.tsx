@@ -11,6 +11,7 @@ import {
   uploadPDF,
   generateCards,
   exportDeck,
+  saveDeck,
   getMe,
   logout,
   type Flashcard,
@@ -39,7 +40,7 @@ export default function Dashboard() {
   const [errorMessage, setErrorMessage] = useState("");
   const [fileName, setFileName] = useState("");
   const [deckName, setDeckName] = useState("My Anki Deck");
-  const [isExporting, setIsExporting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const router = useRouter();
@@ -93,28 +94,22 @@ export default function Dashboard() {
     }
   }, []);
 
-  const handleExport = useCallback(async () => {
+  const handleSaveDeck = useCallback(async () => {
     if (flashcards.length === 0) return;
-    setIsExporting(true);
+    setIsSaving(true);
 
     try {
-      const blob = await exportDeck(deckName, flashcards);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${deckName}.apkg`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      await saveDeck(deckName, flashcards);
+      router.push("/library");
     } catch (err) {
       setErrorMessage(
-        err instanceof Error ? err.message : "Export failed"
+        err instanceof Error ? err.message : "Failed to save deck"
       );
+      setStage("error");
     } finally {
-      setIsExporting(false);
+      setIsSaving(false);
     }
-  }, [flashcards, deckName]);
+  }, [flashcards, deckName, router]);
 
   const handleReset = useCallback(() => {
     setStage("idle");
@@ -147,6 +142,15 @@ export default function Dashboard() {
               Anki Generator
             </h1>
           </div>
+
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+            <Button variant="ghost" onClick={() => router.push("/dashboard")} className="text-muted-foreground hover:text-foreground">
+              Dashboard
+            </Button>
+            <Button variant="ghost" onClick={() => router.push("/library")} className="text-muted-foreground hover:text-foreground">
+              Library
+            </Button>
+          </nav>
 
           <div className="flex items-center gap-4">
             {flashcards.length > 0 && (
@@ -257,7 +261,7 @@ export default function Dashboard() {
             </Card>
           )}
 
-          {/* Export Section */}
+          {/* Save to Library Section */}
           {flashcards.length > 0 && (
             <Card>
               <CardContent className="p-5">
@@ -267,9 +271,9 @@ export default function Dashboard() {
                       <Layers className="size-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Export Deck</p>
+                      <p className="text-sm font-medium">Save Deck</p>
                       <p className="text-xs text-muted-foreground">
-                        Download as .apkg for Anki
+                        Save to your library to preview, edit, or export later
                       </p>
                     </div>
                   </div>
@@ -283,17 +287,17 @@ export default function Dashboard() {
                       className="h-8 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30 transition-all flex-1 sm:w-48"
                     />
                     <Button
-                      onClick={handleExport}
-                      disabled={isExporting}
+                      onClick={handleSaveDeck}
+                      disabled={isSaving}
                       size="default"
                       className="gap-1.5"
                     >
-                      {isExporting ? (
+                      {isSaving ? (
                         <Loader2 className="size-4 animate-spin" />
                       ) : (
-                        <Download className="size-4" />
+                        <CheckCircle2 className="size-4" />
                       )}
-                      {isExporting ? "Exporting..." : "Download"}
+                      {isSaving ? "Saving..." : "Save to Library"}
                     </Button>
                   </div>
                 </div>

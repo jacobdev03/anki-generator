@@ -163,3 +163,111 @@ export async function exportDeck(
 
   return res.blob();
 }
+
+export interface SavedDeck {
+  id: number;
+  title: string;
+  created_at: string;
+  flashcard_count: number;
+}
+
+export interface DeckDetail {
+  id: number;
+  title: string;
+  created_at: string;
+  flashcards: SavedFlashcard[];
+}
+
+export interface SavedFlashcard extends Flashcard {
+  id: number;
+  deck_id: number;
+  created_at: string;
+}
+
+export async function saveDeck(title: string, flashcards: Flashcard[]): Promise<DeckDetail> {
+  const res = await fetch(`${API_BASE}/decks`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ title, flashcards }),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || "Failed to save deck");
+  }
+  return res.json();
+}
+
+export async function getDecks(): Promise<SavedDeck[]> {
+  const res = await fetch(`${API_BASE}/decks`, {
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || "Failed to fetch decks");
+  }
+  return res.json();
+}
+
+export async function getDeck(id: number): Promise<DeckDetail> {
+  const res = await fetch(`${API_BASE}/decks/${id}`, {
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || "Failed to fetch deck");
+  }
+  return res.json();
+}
+
+export async function deleteDeck(id: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/decks/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || "Failed to delete deck");
+  }
+}
+
+export async function updateFlashcard(id: number, front: string, back: string): Promise<SavedFlashcard> {
+  const res = await fetch(`${API_BASE}/flashcards/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ front, back }),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || "Failed to update flashcard");
+  }
+  return res.json();
+}
+
+export async function deleteFlashcard(id: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/flashcards/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || "Failed to delete flashcard");
+  }
+}
+
+export async function exportSavedDeck(id: number): Promise<Blob> {
+  const res = await fetch(`${API_BASE}/decks/${id}/export`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to export saved deck");
+  }
+  return res.blob();
+}
