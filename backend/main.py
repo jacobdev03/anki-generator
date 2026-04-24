@@ -4,13 +4,13 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.endpoints import upload, generate, export, auth
+from app.api.endpoints import upload, generate, export, auth, decks, payments
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -20,6 +20,8 @@ app.include_router(upload.router, prefix="/api")
 app.include_router(generate.router, prefix="/api")
 app.include_router(export.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
+app.include_router(decks.router, prefix="/api")
+app.include_router(payments.router, prefix="/api")
 
 
 @app.get("/")
