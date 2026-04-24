@@ -33,6 +33,7 @@ frontend/.pnpm-debug.log*
 backend/db.sqlite3
 .vscode/
 .idea/
+.agents
 
 # dependencies
 /node_modules

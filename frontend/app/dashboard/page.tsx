@@ -14,6 +14,7 @@ import {
   saveDeck,
   getMe,
   logout,
+  createCheckoutSession,
   type Flashcard,
 } from "@/lib/api";
 import { useRouter } from "next/navigation";
@@ -26,6 +27,7 @@ import {
   Layers,
   Zap,
   LogOut,
+  CreditCard,
   User as UserIcon,
 } from "lucide-react";
 
@@ -43,6 +45,7 @@ export default function Dashboard() {
   const [isSaving, setIsSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [isPurchasing, setIsPurchasing] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -58,6 +61,25 @@ export default function Dashboard() {
     }
     checkAuth();
   }, [router]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get("payment");
+    if (payment === "success") {
+      // Could show a toast here, but for now we just update user data
+      const fetchUserData = async () => {
+        const userData = await getMe();
+        setUser(userData);
+      };
+      fetchUserData();
+      // Remove the param from URL
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (payment === "cancel") {
+      setErrorMessage("Payment was cancelled.");
+      setStage("error");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
 
   const handleFileSelected = useCallback(async (file: File) => {
     setFlashcards([]);
@@ -91,6 +113,9 @@ export default function Dashboard() {
       setErrorMessage(
         err instanceof Error ? err.message : "An unexpected error occurred"
       );
+    } finally {
+      const updatedUser = await getMe();
+      setUser(updatedUser);
     }
   }, []);
 
@@ -119,6 +144,19 @@ export default function Dashboard() {
     setCompletedChunks(0);
     setErrorMessage("");
     setFileName("");
+  }, []);
+
+  const handleBuyCredits = useCallback(async () => {
+    setIsPurchasing(true);
+    try {
+      const { url } = await createCheckoutSession();
+      window.location.href = url;
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Failed to initiate purchase");
+      setStage("error");
+    } finally {
+      setIsPurchasing(false);
+    }
   }, []);
 
   if (isInitializing) {
@@ -153,6 +191,20 @@ export default function Dashboard() {
           </nav>
 
           <div className="flex items-center gap-4">
+            <Badge variant="secondary" className="font-mono text-xs hidden sm:inline-flex items-center gap-1.5">
+              <CreditCard className="size-3" />
+              {user?.credits ?? 0} credits
+            </Badge>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleBuyCredits} 
+              disabled={isPurchasing}
+              className="h-7 text-xs gap-1.5"
+            >
+              {isPurchasing ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
+              Buy Credits
+            </Button>
             {flashcards.length > 0 && (
               <Badge variant="secondary" className="font-mono text-xs hidden sm:inline-flex">
                 {flashcards.length} cards

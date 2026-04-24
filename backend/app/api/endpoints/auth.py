@@ -39,6 +39,7 @@ class UserRead(BaseModel):
     email: str | None = None
     full_name: str | None = None
     disabled: bool | None = None
+    credits: int
 
     model_config = {"from_attributes": True}
 

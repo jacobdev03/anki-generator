@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy.orm import relationship
 from app.database import Base
 
 
@@ -11,3 +12,6 @@ class User(Base):
     full_name = Column(String, nullable=True)
     hashed_password = Column(String, nullable=False)
     disabled = Column(Boolean, default=False)
+    credits = Column(Integer, default=50)
+
+    decks = relationship("Deck", back_populates="user", cascade="all, delete-orphan")

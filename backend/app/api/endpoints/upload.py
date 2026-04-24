@@ -27,6 +27,9 @@ async def handle_upload(
         processor = PDFProcessor(tmp_path)
         chunks = processor.get_markdown_chunks(chunk_size=2000)
         
+        if (current_user.credits < len(chunks)):
+            raise HTTPException(status_code=400, detail="You don't have enough credits to process this file")
+
         return {
             "message": "Processing successful",
             "file_name": file.filename,

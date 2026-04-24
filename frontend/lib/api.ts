@@ -271,3 +271,19 @@ export async function exportSavedDeck(id: number): Promise<Blob> {
   }
   return res.blob();
 }
+
+export async function createCheckoutSession(): Promise<{ url: string }> {
+  const res = await fetch(`${API_BASE}/create-checkout-session`, {
+    method: "POST",
+    headers: {
+      ...getAuthHeaders(),
+    },
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to create checkout session");
+  }
+
+  return res.json();
+}
