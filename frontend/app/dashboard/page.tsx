@@ -15,6 +15,7 @@ import {
   getMe,
   logout,
   createCheckoutSession,
+  createPortalSession,
   type Flashcard,
 } from "@/lib/api";
 import { useRouter } from "next/navigation";
@@ -29,7 +30,10 @@ import {
   LogOut,
   CreditCard,
   User as UserIcon,
+  Settings,
 } from "lucide-react";
+import { toast } from "sonner";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type Stage = "idle" | "uploading" | "generating" | "done" | "error";
 
@@ -66,17 +70,15 @@ export default function Dashboard() {
     const params = new URLSearchParams(window.location.search);
     const payment = params.get("payment");
     if (payment === "success") {
-      // Could show a toast here, but for now we just update user data
+      toast.success("Payment successful! Credits added to your account.");
       const fetchUserData = async () => {
         const userData = await getMe();
         setUser(userData);
       };
       fetchUserData();
-      // Remove the param from URL
       window.history.replaceState({}, "", window.location.pathname);
     } else if (payment === "cancel") {
-      setErrorMessage("Payment was cancelled.");
-      setStage("error");
+      toast.error("Payment was cancelled.");
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);
@@ -110,9 +112,9 @@ export default function Dashboard() {
       setStage("done");
     } catch (err) {
       setStage("error");
-      setErrorMessage(
-        err instanceof Error ? err.message : "An unexpected error occurred"
-      );
+      const msg = err instanceof Error ? err.message : "An unexpected error occurred";
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       const updatedUser = await getMe();
       setUser(updatedUser);
@@ -125,11 +127,12 @@ export default function Dashboard() {
 
     try {
       await saveDeck(deckName, flashcards);
+      toast.success("Deck saved to your library!");
       router.push("/library");
     } catch (err) {
-      setErrorMessage(
-        err instanceof Error ? err.message : "Failed to save deck"
-      );
+      const msg = err instanceof Error ? err.message : "Failed to save deck";
+      setErrorMessage(msg);
+      toast.error(msg);
       setStage("error");
     } finally {
       setIsSaving(false);
@@ -152,10 +155,22 @@ export default function Dashboard() {
       const { url } = await createCheckoutSession();
       window.location.href = url;
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Failed to initiate purchase");
+      const msg = err instanceof Error ? err.message : "Failed to initiate purchase";
+      setErrorMessage(msg);
+      toast.error(msg);
       setStage("error");
     } finally {
       setIsPurchasing(false);
+    }
+  }, []);
+
+  const handleManageBilling = useCallback(async () => {
+    try {
+      const { url } = await createPortalSession();
+      window.location.href = url;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to open billing portal. Ensure you have made at least one purchase.";
+      toast.error(msg);
     }
   }, []);
 
@@ -211,13 +226,17 @@ export default function Dashboard() {
               </Badge>
             )}
             {user && (
-              <div className="flex items-center gap-3 border-l pl-4">
+              <div className="flex items-center gap-3 border-l pl-4 border-border">
+                <ThemeToggle />
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <div className="flex items-center justify-center size-7 rounded-full bg-secondary text-secondary-foreground">
                     <UserIcon className="size-3.5" />
                   </div>
                   <span className="hidden sm:inline-block">{user.username}</span>
                 </div>
+                <Button variant="ghost" size="icon" onClick={handleManageBilling} className="size-8 rounded-full" title="Billing">
+                  <Settings className="size-4 text-muted-foreground" />
+                </Button>
                 <Button variant="ghost" size="icon" onClick={logout} className="size-8 rounded-full" title="Logout">
                   <LogOut className="size-4 text-muted-foreground" />
                 </Button>

@@ -6,13 +6,26 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
-import { Loader2, Zap, User as UserIcon, LogOut, BookOpen, Clock, Trash2, Edit3 } from "lucide-react";
+import { Loader2, Zap, User as UserIcon, LogOut, BookOpen, Clock, Trash2, Edit3, Settings } from "lucide-react";
+import { toast } from "sonner";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { createPortalSession } from "@/lib/api";
 
 export default function LibraryPage() {
   const [decks, setDecks] = useState<SavedDeck[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
+
+  const handleManageBilling = async () => {
+    try {
+      const { url } = await createPortalSession();
+      window.location.href = url;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to open billing portal. Ensure you have made at least one purchase.";
+      toast.error(msg);
+    }
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -63,13 +76,17 @@ export default function LibraryPage() {
 
           <div className="flex items-center gap-4">
             {user && (
-              <div className="flex items-center gap-3 border-l pl-4">
+              <div className="flex items-center gap-3 border-l pl-4 border-border">
+                <ThemeToggle />
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <div className="flex items-center justify-center size-7 rounded-full bg-secondary text-secondary-foreground">
                     <UserIcon className="size-3.5" />
                   </div>
                   <span className="hidden sm:inline-block">{user.username}</span>
                 </div>
+                <Button variant="ghost" size="icon" onClick={handleManageBilling} className="size-8 rounded-full" title="Billing">
+                  <Settings className="size-4 text-muted-foreground" />
+                </Button>
                 <Button variant="ghost" size="icon" onClick={logout} className="size-8 rounded-full" title="Logout">
                   <LogOut className="size-4 text-muted-foreground" />
                 </Button>
