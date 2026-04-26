@@ -12,6 +12,10 @@ async def handle_upload(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_active_user)
 ):
+    MAX_SIZE = 10 * 1024 * 1024
+    if file.size > MAX_SIZE:
+        raise HTTPException(status_code=400, detail="File size exceeds the 50MB limit.")
+
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
 

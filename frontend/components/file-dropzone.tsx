@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { Upload, FileText, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface FileDropzoneProps {
   onFileSelected: (file: File) => void;
@@ -43,9 +44,17 @@ export function FileDropzone({ onFileSelected, disabled }: FileDropzoneProps) {
       const files = e.dataTransfer.files;
       if (files && files.length > 0) {
         const file = files[0];
+        
+        if (file.size > 50 * 1024 * 1024) {
+          toast.error("File size exceeds the 50MB limit.");
+          return;
+        }
+
         if (file.name.toLowerCase().endsWith(".pdf")) {
           setSelectedFile(file);
           onFileSelected(file);
+        } else {
+          toast.error("Only PDF files are supported.");
         }
       }
     },
@@ -57,8 +66,21 @@ export function FileDropzone({ onFileSelected, disabled }: FileDropzoneProps) {
       if (disabled) return;
       const files = e.target.files;
       if (files && files.length > 0) {
-        setSelectedFile(files[0]);
-        onFileSelected(files[0]);
+        const file = files[0];
+        
+        if (file.size > 50 * 1024 * 1024) {
+          toast.error("File size exceeds the 50MB limit.");
+          e.target.value = "";
+          return;
+        }
+
+        if (file.name.toLowerCase().endsWith(".pdf")) {
+          setSelectedFile(file);
+          onFileSelected(file);
+        } else {
+          toast.error("Only PDF files are supported.");
+          e.target.value = "";
+        }
       }
     },
     [onFileSelected, disabled]
