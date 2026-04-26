@@ -287,3 +287,19 @@ export async function createCheckoutSession(): Promise<{ url: string }> {
 
   return res.json();
 }
+
+export async function createPortalSession(): Promise<{ url: string }> {
+  const res = await fetch(`${API_BASE}/create-portal-session`, {
+    method: "POST",
+    headers: {
+      ...getAuthHeaders(),
+    },
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to create portal session");
+  }
+
+  return res.json();
+}

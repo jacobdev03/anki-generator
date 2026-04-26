@@ -41,6 +41,26 @@ async def create_checkout_session(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.post("/create-portal-session")
+async def create_portal_session(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    try:
+        # Find customer by email
+        customers = stripe.Customer.list(email=current_user.email, limit=1)
+        if not customers.data:
+            raise HTTPException(status_code=400, detail="No billing history found for this user.")
+        
+        customer_id = customers.data[0].id
+        
+        session = stripe.billing_portal.Session.create(
+            customer=customer_id,
+            return_url='http://localhost:3000/dashboard'
+        )
+        return {"url": session.url}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.post("/webhook")
 async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     payload = await request.body()
