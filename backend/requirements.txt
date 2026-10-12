@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+alembic
+python-dotenv
+pydantic
+openai
+pymupdf
+pymupdf4llm
+pytesseract
+Pillow
+genanki
+pwdlib[argon2]
+PyJWT
+stripe
+python-multipart
