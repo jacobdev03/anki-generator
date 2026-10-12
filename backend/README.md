@@ -1,5 +1,9 @@
 # Backend startup and migrations
 
+See [local configuration](../CONFIGURATION.md) for the three example environment
+files and Docker Compose setup. For a local Python run, copy `backend/.env.example`
+to `backend/.env` and replace the placeholders.
+
 Install the backend dependencies in a Python virtual environment:
 
 ```sh

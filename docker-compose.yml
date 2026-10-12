@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: anki-generator
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in root .env or your shell}
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
@@ -20,12 +20,12 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:${DB_PASSWORD}@db:5432/anki-generator
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
-      STRIPE_PRICE_ID_100_CREDITS: ${STRIPE_PRICE_ID_100_CREDITS}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      DATABASE_URL: postgresql+psycopg2://postgres:${DB_PASSWORD:?Set DB_PASSWORD in root .env or your shell}@db:5432/anki-generator
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?Set OPENAI_API_KEY in root .env or your shell}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PRICE_ID_100_CREDITS: ${STRIPE_PRICE_ID_100_CREDITS:-}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in root .env or your shell}
       JWT_ALGORITHM: HS256
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
     depends_on:

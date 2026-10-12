@@ -1,3 +1,26 @@
+# Local dependencies and generated output
+node_modules/
+.next/
+out/
+build/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local configuration and credentials
+.env*
+*.pem
+*.key
+
+# Development metadata and logs
+.git/
+.agents/
+.codex/
+.vscode/
+.idea/
+*.log
+.DS_Store
+
 # Docker
 docker-compose.yml
 .docker/

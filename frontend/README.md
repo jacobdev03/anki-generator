@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Anki Generator frontend
 
-## Getting Started
+The frontend uses Next.js and npm. `package-lock.json` is the dependency lockfile;
+the Docker build also installs dependencies with `npm ci`.
 
-First, run the development server:
+From the `frontend` directory, install dependencies and create local configuration:
 
-```bash
+```powershell
+npm ci
+Copy-Item .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000. The backend should be available at
+http://localhost:8000; the browser API URL is configured by `NEXT_PUBLIC_API_URL`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For a production build:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sh
+npm run build
+npm start
+```
 
-## Learn More
+`NEXT_PUBLIC_API_URL` is embedded at build time. Rebuild after changing it.
+The frontend must never receive OpenAI, Stripe or JWT secrets.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See [configuration](../CONFIGURATION.md) for Docker Compose setup and
+[backend setup](../backend/README.md) for migrations and local Python startup.
