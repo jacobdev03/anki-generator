@@ -20,7 +20,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@db:5432/anki-generator
+      DATABASE_URL: postgresql+psycopg2://postgres:${DB_PASSWORD}@db:5432/anki-generator
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}

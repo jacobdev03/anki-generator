@@ -1,7 +1,7 @@
 """Initial schema
 
 Revision ID: 7896fa3e3d17
-Revises: 
+Revises: 6b2c4e8a901f
 Create Date: 2026-04-19 14:29:46.848004
 
 """
@@ -13,7 +13,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = '7896fa3e3d17'
-down_revision: Union[str, Sequence[str], None] = None
+down_revision: Union[str, Sequence[str], None] = '6b2c4e8a901f'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

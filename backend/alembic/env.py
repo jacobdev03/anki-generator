@@ -28,7 +28,8 @@ from app.database import Base
 from app.models.user import User
 
 # Set the DB URL dynamically from the env var
-config.set_main_option("sqlalchemy.url", os.environ.get("DATABASE_URL"))
+# ConfigParser interprets percent signs; escape URL-encoded passwords/options.
+config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"].replace("%", "%%"))
 
 target_metadata = Base.metadata
 
