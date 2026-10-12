@@ -13,8 +13,8 @@ async def handle_upload(
     current_user: User = Depends(get_current_active_user)
 ):
     MAX_SIZE = 10 * 1024 * 1024
-    if file.size > MAX_SIZE:
-        raise HTTPException(status_code=400, detail="File size exceeds the 50MB limit.")
+    if file.size and file.size > MAX_SIZE:
+        raise HTTPException(status_code=400, detail="File size exceeds the 10MB limit.")
 
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
@@ -40,6 +40,8 @@ async def handle_upload(
             "total_chunks": len(chunks),
             "chunks": chunks
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process PDF: {e}")
     finally:

@@ -9,7 +9,6 @@ from app.database import get_db
 from app.api.endpoints.auth import get_current_active_user
 from app.models.user import User
 
-# Initialize Stripe
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 
@@ -46,7 +45,6 @@ async def create_portal_session(
     current_user: Annotated[User, Depends(get_current_active_user)]
 ):
     try:
-        # Find customer by email
         customers = stripe.Customer.list(email=current_user.email, limit=1)
         if not customers.data:
             raise HTTPException(status_code=400, detail="No billing history found for this user.")
@@ -71,22 +69,16 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             payload, sig_header, endpoint_secret
         )
     except ValueError as e:
-        # Invalid payload
         raise HTTPException(status_code=400, detail="Invalid payload")
     except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
         raise HTTPException(status_code=400, detail="Invalid signature")
 
-    # Handle the event
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        
-        # Fulfill the purchase...
         user_id = session.client_reference_id
         if user_id:
             user = db.query(User).filter(User.id == int(user_id)).first()
             if user:
-                # Add 100 credits
                 user.credits += 100
                 db.commit()
                 print(f"Added 100 credits to user {user.username}")
