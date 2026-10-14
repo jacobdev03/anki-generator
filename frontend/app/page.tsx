@@ -15,7 +15,7 @@ export default function Home() {
           </div>
           <nav className="flex items-center gap-4">
             <ThemeToggle />
-            <Link href="/login" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <Link href="/auth" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
               Log in
             </Link>
             <Link href="/dashboard">

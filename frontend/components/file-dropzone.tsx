@@ -5,6 +5,9 @@ import { Upload, FileText, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+const MAX_PDF_SIZE_BYTES = 10 * 1024 * 1024;
+const PDF_SIZE_ERROR = "File size exceeds the 10MB limit.";
+
 interface FileDropzoneProps {
   onFileSelected: (file: File) => void;
   disabled?: boolean;
@@ -45,8 +48,8 @@ export function FileDropzone({ onFileSelected, disabled }: FileDropzoneProps) {
       if (files && files.length > 0) {
         const file = files[0];
         
-        if (file.size > 50 * 1024 * 1024) {
-          toast.error("File size exceeds the 50MB limit.");
+        if (file.size > MAX_PDF_SIZE_BYTES) {
+          toast.error(PDF_SIZE_ERROR);
           return;
         }
 
@@ -68,8 +71,8 @@ export function FileDropzone({ onFileSelected, disabled }: FileDropzoneProps) {
       if (files && files.length > 0) {
         const file = files[0];
         
-        if (file.size > 50 * 1024 * 1024) {
-          toast.error("File size exceeds the 50MB limit.");
+        if (file.size > MAX_PDF_SIZE_BYTES) {
+          toast.error(PDF_SIZE_ERROR);
           e.target.value = "";
           return;
         }
@@ -138,7 +141,7 @@ export function FileDropzone({ onFileSelected, disabled }: FileDropzoneProps) {
             Drop your PDF here, or click to browse
           </p>
           <p className="text-xs text-muted-foreground">
-            Supports .pdf files only
+            Supports .pdf files only · Max 10 MB
           </p>
         </>
       )}
