@@ -137,8 +137,8 @@ application has not yet been verified. Automated end-to-end tests and CI are pla
 ## Current scope
 
 This is a portfolio MVP. The supported upload format is PDF; DOCX, PPTX and
-direct text input are not implemented. Some landing-page copy describes planned
-features and pricing, rather than the current credit-based implementation.
+direct text input are not implemented. Generation uses credits, with one credit
+consumed per successful text-chunk request.
 
 The export uses basic front/back cards. Dedicated cloze note types and rich
 Markdown rendering are not implemented. AI output should be reviewed before use.

@@ -16,17 +16,17 @@ const newsreader = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: "AnkiGen | Transform Lectures into Anki Flashcards Instantly",
-  description: "Upload PDFs, slides, or notes. Our AI instantly extracts core concepts into high-quality, exam-ready Anki flashcards tailored for your academic success.",
+  title: "Anki Generator | From PDF to an editable study deck",
+  description: "Generate Polish flashcards from a PDF, review and edit your saved deck, then export it to Anki as an .apkg file.",
   openGraph: {
-    title: "AnkiGen | Transform Lectures into Anki Flashcards Instantly",
-    description: "Stop wasting hours typing study materials. Upload your notes and let AI build your perfect Anki deck instantly.",
+    title: "Anki Generator | From PDF to an editable study deck",
+    description: "Turn a lecture PDF into draft flashcards. Review, edit and export your deck to Anki.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AnkiGen | AI Flashcard Generator",
-    description: "Transform your lectures into exam-ready Anki flashcards in seconds.",
+    title: "Anki Generator | PDF flashcards",
+    description: "Polish flashcards from your PDF, with editing and Anki export.",
   }
 };
 
