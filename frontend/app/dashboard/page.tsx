@@ -350,6 +350,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-3 w-full sm:w-auto">
                     <input
                       id="deck-name-input"
+                      aria-label="Deck name"
                       type="text"
                       value={deckName}
                       onChange={(e) => setDeckName(e.target.value)}

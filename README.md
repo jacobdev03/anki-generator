@@ -129,10 +129,24 @@ python -m unittest discover -s tests -v
 Migration tests use temporary SQLite databases by default. An optional dedicated
 PostgreSQL test database is supported; see [backend tests](backend/README.md#migration-regression-tests).
 
-The main flow has also been checked manually: authentication, PDF upload, real
-AI generation, saving and reopening a deck, editing cards, and APKG export.
-The exported package was inspected for its card data; import into the Anki desktop
-application has not yet been verified. Automated end-to-end tests and CI are planned.
+The basic application flow is covered by Playwright: registration/login, PDF
+upload, generation, credit accounting, saving, editing, reopening and APKG export.
+The browser tests use a real frontend/backend and a separate temporary SQLite
+database, with a controlled AI response instead of paid OpenAI calls.
+
+After installing backend dependencies, from `frontend`:
+
+```powershell
+npx playwright install chromium
+npm run test:e2e
+```
+
+See [browser test setup and coverage](frontend/tests/e2e/README.md) for interpreter
+selection, reports and limitations. GitHub Actions runs migration tests, lint,
+typechecking and the frontend build/browser tests on pushes and pull requests.
+
+Real AI generation has also been checked manually. APKG package contents are
+verified, but import into the Anki desktop application has not yet been tested.
 
 ## Current scope
 
@@ -145,8 +159,8 @@ Markdown rendering are not implemented. AI output should be reviewed before use.
 The current OCR setup uses Tesseract's default language data.
 
 The 10 MB upload limit does not cap the number of pages, processing time or
-generation tokens. Further resource limits, automated flow tests and deployment
-hardening are next steps before operating the application as a public service.
+generation tokens. Further resource limits, PostgreSQL integration coverage and
+deployment hardening are next steps before operating the application as a public service.
 
 ## Repository layout
 

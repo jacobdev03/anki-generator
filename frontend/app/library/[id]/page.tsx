@@ -180,16 +180,18 @@ export default function DeckPreviewPage({ params }: { params: Promise<{ id: stri
                   {isEditing ? (
                     <div className="p-4 space-y-4 bg-muted/30">
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Front</label>
+                        <label htmlFor={`edit-front-${card.id}`} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Front</label>
                         <Textarea
+                          id={`edit-front-${card.id}`}
                           value={editFront}
                           onChange={e => setEditFront(e.target.value)}
                           className="min-h-[80px] resize-y"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Back</label>
+                        <label htmlFor={`edit-back-${card.id}`} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Back</label>
                         <Textarea
+                          id={`edit-back-${card.id}`}
                           value={editBack}
                           onChange={e => setEditBack(e.target.value)}
                           className="min-h-[80px] resize-y"

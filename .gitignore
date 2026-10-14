@@ -47,6 +47,8 @@ backend/db.sqlite3
 
 # testing
 /coverage
+frontend/playwright-report/
+frontend/test-results/
 
 # next.js
 /.next/
