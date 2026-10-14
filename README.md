@@ -143,7 +143,8 @@ npm run test:e2e
 
 See [browser test setup and coverage](frontend/tests/e2e/README.md) for interpreter
 selection, reports and limitations. GitHub Actions runs migration tests, lint,
-typechecking and the frontend build/browser tests on pushes and pull requests.
+typechecking and the frontend build/browser tests on pushes to `master`/`main`
+and on pull requests. The workflow can also be started manually.
 
 Real AI generation has also been checked manually. APKG package contents are
 verified, but import into the Anki desktop application has not yet been tested.
@@ -157,6 +158,9 @@ consumed per successful text-chunk request.
 The export uses basic front/back cards. Dedicated cloze note types and rich
 Markdown rendering are not implemented. AI output should be reviewed before use.
 The current OCR setup uses Tesseract's default language data.
+The fallback checks the extracted text across the whole document; OCR is applied
+to all pages only when that text is shorter than 500 meaningful characters.
+In mixed text-and-scan PDFs, scanned pages may therefore be missed.
 
 The 10 MB upload limit does not cap the number of pages, processing time or
 generation tokens. Further resource limits, PostgreSQL integration coverage and

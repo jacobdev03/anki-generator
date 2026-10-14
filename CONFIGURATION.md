@@ -76,6 +76,11 @@ For payment testing, use Stripe test-mode credentials, a test price for 100 cred
 and a webhook signing secret for events forwarded to `/api/webhook`.
 Empty payment settings do not prevent startup; payment features require configuration.
 
+The current Stripe checkout and billing-portal return URLs point to
+`http://localhost:3000/dashboard`. Changing `FRONTEND_URL` updates CORS, but does
+not update those payment return URLs. Update the integration's return URLs before
+testing payments on another frontend origin or deploying the application.
+
 ## Updating configuration
 
 Shell environment variables take precedence over `.env`. An earlier PowerShell
@@ -87,8 +92,8 @@ After changing backend configuration, recreate the backend container:
 docker compose up -d --force-recreate backend
 ```
 
-Include `-p anki-start-test` in each Compose command when continuing the separate
-test project created earlier. This keeps commands targeting the same database volume.
+If you choose a Compose project name with `-p`, use the same name in subsequent
+commands so they target the same services and database volume.
 
 The public `NEXT_PUBLIC_API_URL` is embedded in the frontend at build time.
 Rebuild a Docker frontend after changing it; restart `npm run dev` for local development.
