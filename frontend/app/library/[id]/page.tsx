@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState, use, useCallback } from "react";
+import { useEffect, useState, use } from "react";
 import { getDeck, updateFlashcard, deleteFlashcard, exportSavedDeck, deleteDeck, type DeckDetail, type SavedFlashcard } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { Loader2, ArrowLeft, Download, Trash2, Edit2, Check, X } from "lucide-react";
@@ -21,21 +20,33 @@ export default function DeckPreviewPage({ params }: { params: Promise<{ id: stri
   const [editBack, setEditBack] = useState("");
   const router = useRouter();
 
-  const loadDeck = useCallback(async () => {
-    try {
-      const data = await getDeck(deckId);
-      setDeck(data);
-    } catch (err) {
-      console.error(err);
-      router.push("/library");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [deckId, router]);
-
   useEffect(() => {
-    loadDeck();
-  }, [loadDeck]);
+    let ignore = false;
+
+    async function loadDeck() {
+      try {
+        const data = await getDeck(deckId);
+        if (!ignore) {
+          setDeck(data);
+        }
+      } catch (err) {
+        if (!ignore) {
+          console.error(err);
+          router.push("/library");
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadDeck();
+
+    return () => {
+      ignore = true;
+    };
+  }, [deckId, router]);
 
   const handleExport = async () => {
     if (!deck) return;
@@ -160,7 +171,7 @@ export default function DeckPreviewPage({ params }: { params: Promise<{ id: stri
         </div>
 
         <div className="space-y-4">
-          {deck.flashcards.map((card, index) => {
+          {deck.flashcards.map((card) => {
             const isEditing = editingCardId === card.id;
 
             return (

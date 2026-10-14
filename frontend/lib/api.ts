@@ -28,6 +28,15 @@ function getAuthHeaders(): HeadersInit {
 
 // --- Auth Endpoints ---
 
+export interface User {
+  id: number;
+  username: string;
+  email: string | null;
+  full_name: string | null;
+  disabled: boolean | null;
+  credits: number;
+}
+
 export async function login(username: string, password: string) {
   const formData = new URLSearchParams();
   formData.append("username", username);
@@ -73,7 +82,7 @@ export async function register(username: string, email: string, password: string
   return res.json();
 }
 
-export async function getMe() {
+export async function getMe(): Promise<User> {
   const res = await fetch(`${API_BASE}/users/me/`, {
     headers: {
       ...getAuthHeaders(),

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Zap, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -33,8 +33,8 @@ export default function AuthPage() {
     try {
       await login(loginUsername, loginPassword);
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Invalid credentials");
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "Invalid credentials");
     } finally {
       setIsLoading(false);
     }
@@ -49,8 +49,8 @@ export default function AuthPage() {
       await register(registerUsername, registerEmail, registerPassword, registerFullName);
       await login(registerUsername, registerPassword);
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Registration failed");
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "Registration failed");
     } finally {
       setIsLoading(false);
     }

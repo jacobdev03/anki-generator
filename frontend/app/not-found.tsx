@@ -11,7 +11,7 @@ export default function NotFound() {
       <h1 className="text-6xl font-extrabold tracking-tight mb-4">404</h1>
       <h2 className="text-2xl font-bold tracking-tight mb-4">Page Not Found</h2>
       <p className="text-muted-foreground max-w-md mb-8">
-        We couldn't find the page you're looking for. It might have been moved, deleted, or perhaps you just mistyped the URL.
+        We couldn&apos;t find the page you&apos;re looking for. It might have been moved, deleted, or perhaps you just mistyped the URL.
       </p>
       <Link href="/">
         <Button size="lg" className="rounded-full gap-2">

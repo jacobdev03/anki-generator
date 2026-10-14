@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getDecks, type SavedDeck, logout, getMe } from "@/lib/api";
+import { getDecks, type SavedDeck, type User, logout, getMe } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
-import { Loader2, Zap, User as UserIcon, LogOut, BookOpen, Clock, Trash2, Edit3, Settings } from "lucide-react";
+import { Loader2, Zap, User as UserIcon, LogOut, BookOpen, Clock, Edit3, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { createPortalSession } from "@/lib/api";
@@ -14,7 +14,7 @@ import { createPortalSession } from "@/lib/api";
 export default function LibraryPage() {
   const [decks, setDecks] = useState<SavedDeck[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
   const handleManageBilling = async () => {
@@ -34,7 +34,7 @@ export default function LibraryPage() {
         setUser(userData);
         const decksData = await getDecks();
         setDecks(decksData);
-      } catch (err) {
+      } catch {
         router.push("/auth");
       } finally {
         setIsLoading(false);
@@ -113,7 +113,7 @@ export default function LibraryPage() {
               </div>
               <h3 className="text-lg font-semibold">No decks found</h3>
               <p className="text-sm text-muted-foreground mt-1 mb-4">
-                You haven't saved any flashcard decks yet.
+                You haven&apos;t saved any flashcard decks yet.
               </p>
               <Button onClick={() => router.push("/dashboard")}>
                 Generate Flashcards

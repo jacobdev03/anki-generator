@@ -10,18 +10,17 @@ import { Badge } from "@/components/ui/badge";
 import {
   uploadPDF,
   generateCards,
-  exportDeck,
   saveDeck,
   getMe,
   logout,
   createCheckoutSession,
   createPortalSession,
   type Flashcard,
+  type User,
 } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import {
   Sparkles,
-  Download,
   Loader2,
   CheckCircle2,
   AlertCircle,
@@ -47,7 +46,7 @@ export default function Dashboard() {
   const [fileName, setFileName] = useState("");
   const [deckName, setDeckName] = useState("My Anki Deck");
   const [isSaving, setIsSaving] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const router = useRouter();
@@ -57,7 +56,7 @@ export default function Dashboard() {
       try {
         const userData = await getMe();
         setUser(userData);
-      } catch (err) {
+      } catch {
         router.push("/auth");
       } finally {
         setIsInitializing(false);

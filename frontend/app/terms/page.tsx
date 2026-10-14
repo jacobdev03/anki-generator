@@ -40,7 +40,7 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="text-2xl font-bold mt-8 mb-4">5. Disclaimer</h2>
-            <p>The materials on AnkiGen are provided on an 'as is' basis. We make no warranties, expressed or implied, and hereby disclaim and negate all other warranties including, without limitation, implied warranties or conditions of merchantability.</p>
+            <p>The materials on AnkiGen are provided on an &apos;as is&apos; basis. We make no warranties, expressed or implied, and hereby disclaim and negate all other warranties including, without limitation, implied warranties or conditions of merchantability.</p>
           </section>
         </div>
       </main>
