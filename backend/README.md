@@ -4,11 +4,25 @@ See [local configuration](../CONFIGURATION.md) for the three example environment
 files and Docker Compose setup. For a local Python run, copy `backend/.env.example`
 to `backend/.env` and replace the placeholders.
 
-Install the backend dependencies in a Python virtual environment:
+For a local Python run, use Python 3.12 and a running PostgreSQL database.
+From the repository root, enter `backend`, create a virtual environment and
+install dependencies. Reuse an existing virtual environment if one is already present.
 
-```sh
-pip install -r requirements.txt
+```powershell
+cd backend
+python -m venv venv
+.\venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
+
+On Linux/macOS, use `python -m venv .venv` and
+`.venv/bin/python -m pip install -r requirements.txt` instead.
+
+OCR outside Docker also requires the **Tesseract executable installed and available
+on PATH**; installing `pytesseract` with pip only installs the Python wrapper.
+Verify with `tesseract --version`. See the
+[pytesseract installation instructions](https://github.com/madmaze/pytesseract#installation).
+The backend Docker image includes Tesseract. Text-based PDFs with enough extracted
+content do not use this OCR fallback.
 
 Configure `DATABASE_URL` in `backend/.env` for PostgreSQL, for example:
 
@@ -22,10 +36,12 @@ The application also requires `OPENAI_API_KEY`, `JWT_SECRET_KEY` and
 From the `backend` directory, initialize or upgrade the database before starting
 the API:
 
-```sh
-alembic upgrade head
-uvicorn main:app --host 0.0.0.0 --port 8000
+```powershell
+.\venv\Scripts\python.exe -m alembic upgrade head
+.\venv\Scripts\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
+
+On Linux/macOS, replace `.\venv\Scripts\python.exe` with `.venv/bin/python`.
 
 The backend Docker image performs `alembic upgrade head` automatically before
 starting Uvicorn. If migration fails, the API does not start. Docker Compose waits
